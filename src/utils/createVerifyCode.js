@@ -1,3 +1,5 @@
+const { default: mongoose } = require("mongoose");
+
 const createVerifyCode = () => {
     // Tạo số ngẫu nhiên từ 0 đến 899999
     const min = 100000;
@@ -9,4 +11,14 @@ const createVerifyCode = () => {
     return token;
 }
 
-module.exports = { createVerifyCode }
+const convertToObjectId = (id) => {
+    const result = new mongoose.Types.ObjectId(id)
+    return result
+}
+
+const removeVietnameseTones = (str) => {
+    return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        .replace(/đ/g, 'd').replace(/Đ/g, 'D');
+}
+
+module.exports = { createVerifyCode, convertToObjectId, removeVietnameseTones }

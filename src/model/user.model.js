@@ -8,8 +8,14 @@ var userSchema = new mongoose.Schema({
     user_name: {
         type: String,
         required: true,
-        index: true,
         trim: true,
+        maxLength: 50
+    },
+    user_name_no_tones: {
+        type: String,
+        required: true,
+        trim: true,
+        index: true,
         maxLength: 50
     },
     user_roles: {
@@ -53,9 +59,9 @@ var userSchema = new mongoose.Schema({
         required: false,
         default: null
     },
-    // user_list_friend: {
-    //     type: [mongoose.Types.ObjectId],
-    // },
+    user_list_friend: {
+        type: [{ type: mongoose.Types.ObjectId, ref: "User" }],
+    },
     // user_list_friend_request: {
     //     type: Array,
     //     ref: "friendRequest"

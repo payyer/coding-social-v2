@@ -4,8 +4,8 @@ const mongoose = require('mongoose');
 const userModel = require("../model/user.model");
 const tokenModel = require("../model/token.model");
 const { createToken } = require("../auth/authentication");
-const { createVerifyCode } = require("../utils/createVerifyCode");
-const { sendVerifyCodeByEmailService } = require("../service/user.service");
+const { createVerifyCode, removeVietnameseTones } = require("../utils/createVerifyCode");
+const { sendVerifyCodeByEmailService } = require("../service/access.service");
 
 const register = async (req, res) => {
     try {
@@ -23,10 +23,13 @@ const register = async (req, res) => {
 
         const newAccount = await userModel.create({
             user_name: name,
+            user_name_no_tones: await removeVietnameseTones(name),
             user_email: email,
             user_password: passwordHashing,
-            email_verify_token: createVerifyCode(),
+            email_verify_token: await createVerifyCode(),
         });
+
+        await sendVerifyCodeByEmailService(newAccount.user_email, newAccount.email_verify_token)
 
         return res.json({
             message: "Tạo mới thành công, cần xác nhận email để có thể đăng nhập",

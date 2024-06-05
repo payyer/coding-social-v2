@@ -1,12 +1,15 @@
 const express = require("express");
-const { register, verifyEmail, login, getNewAccessToken, logout, sendVerifyCodeViaEmail, resetPassword } = require("../../controller/user.controller");
+const { checkAuth } = require("../../auth/authentication");
+const { acceptFriendRequest, getFriendList, searchUser } = require("../../controller/use.controller");
 const router = express.Router()
 
-router.post('/login', login)
-router.post('/logout', logout)
-router.put('/verify', verifyEmail)
-router.post('/register', register)
-router.post('/token', getNewAccessToken)
-router.put('/resetPassword', resetPassword)
-router.post('/sendVerifyCode', sendVerifyCodeViaEmail)
+router.use(checkAuth)
+
+router.get('/getFriendList', getFriendList)
+router.get('/search', searchUser)
+router.post('/acceptFriendRequest', acceptFriendRequest)
+
+
+
+
 module.exports = router;
