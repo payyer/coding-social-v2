@@ -167,15 +167,16 @@ const getNewAccessToken = async (req, res) => {
 const logout = async (req, res) => {
     const userId = req.body.userId
 
-    const foundTokenStore = await tokenModel.findOneAndDelete({
-        user_id: new mongoose.Types.ObjectId(userId)
-    }).lean()
-
-    res.cookie('accessToken', '', { maxAge: 0 })
-    res.cookie('refreshToken', '', { httpOnly: true, maxAge: 0 })
-
-    if (!foundTokenStore) return res.json({ message: "Không tìm thấy token store", code: 404 })
-    return res.json({ message: "Đăng xuất thành công", code: 200 })
+    try {
+        await tokenModel.findOneAndDelete({
+            user_id: new mongoose.Types.ObjectId(userId)
+        })
+        res.cookie('accessToken', '', { maxAge: 0 })
+        res.cookie('refreshToken', '', { httpOnly: true, maxAge: 0 })
+        return res.status(200).json({ message: "Đăng xuất thành công", code: 200 })
+    } catch (error) {
+        return res.status(500).json({ message: "Lỗi server", error: error.message })
+    }
 }
 
 const sendVerifyCodeViaEmail = async (req, res) => {
