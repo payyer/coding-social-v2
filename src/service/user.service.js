@@ -20,4 +20,17 @@ const addFriendService = async (userId, senderId) => {
     )
 }
 
-module.exports = { addFriendService }
+const unfriendService = async (userId, unFriendUserId) => {
+    await userModel.findByIdAndUpdate(userId,
+        {
+            $pull: { user_list_friend: convertToObjectId(unFriendUserId) }
+        },
+        { new: true })
+    await userModel.findByIdAndUpdate(unFriendUserId,
+        {
+            $pull: { user_list_friend: convertToObjectId(userId) }
+        },
+        { new: true })
+}
+
+module.exports = { addFriendService, unfriendService }

@@ -1,7 +1,35 @@
 const userModel = require("../model/user.model")
 const friendRequestModel = require('../model/friendRequest')
-const { addFriendService } = require("../service/user.service")
+const { addFriendService, unfriendService } = require("../service/user.service")
 const { removeVietnameseTones } = require("../utils/createVerifyCode")
+const cloudinary = require('../utils/cloudinary')
+
+const getUserInfo = async (req, res) => {
+    const userId = req.params.userId
+    try {
+        const userInfo = await userModel.findById(userId)
+            .select({
+                user_name_no_tones: 0,
+                user_roles: 0,
+                user_password: 0,
+                user_verify: 0,
+                email_verify_token: 0,
+                createdAt: 0,
+                updatedAt: 0,
+                __v: 0
+            })
+            .lean()
+        return res.status(200).json({
+            metadata: userInfo
+        })
+    } catch (error) {
+        return res.status(500).json({
+            message: "Lỗi server",
+            metadata: error.message
+        })
+    }
+
+}
 
 const getFriendList = async (req, res) => {
     const userId = req.user.userId
@@ -37,6 +65,23 @@ const acceptFriendRequest = async (req, res) => {
 
         return res.status(200).json({
             message: "Chấp nhận lời mời kết bạn thành công"
+        })
+    } catch (error) {
+        return res.status(500).json({
+            message: "Lỗi server",
+            metadata: error.message
+        })
+    }
+}
+
+const rejectFriendRequest = async (req, res) => {
+    const userId = req.user.userId
+    const { senderId } = req.body
+
+    try {
+        await friendRequestModel.deleteMany({ sender_id: senderId, receiver_id: userId })
+        return res.status(200).json({
+            message: "Từ chối kết bạn thành công"
         })
     } catch (error) {
         return res.status(500).json({
@@ -90,6 +135,147 @@ const searchUser = async (req, res) => {
 
 }
 
+const updateUserInfo = async (req, res) => {
+    const userId = req.user.userId
+    const { user_name, user_bio, user_birthday, user_country, user_display_settings } = req.body
+    const files = req.files // Cv để update => file
+    console.log([{ files }])
+    try {
+        // TODO: Đã update các file bình thường, còn up file cv lên clound nữa là xog
+        // TODO: Check CV file on Clound to delete old file and add new file upload
+        const foundUserAndUpdate = await userModel.findByIdAndUpdate(userId,
+            {
+                user_name,
+                user_bio,
+                user_birthday,
+                user_country,
+                user_display_settings
+            },
+            { new: true })
+            .select({ createdAt: 0, updatedAt: 0, email_verify_token: 0, user_verify: 0, user_list_friend: 0, user_roles: 0, "__v": 0 })
+
+        if (!foundUserAndUpdate) throw res.status(401).json({ message: "Không tìm thấy người dùng" })
+
+        if (foundUserAndUpdate.user_cv.public_id) {
+            cloudinary.uploader.destroy(foundUserAndUpdate.user_cv.public_id)
+                .then(result => console.log("Delete image on cloud", result))
+                .catch(error => console.log("Delete Image Error", error))
+        }
+
+        const media = await cloudinary.uploader.upload(files[0].path, {
+            folder: 'SocialMedia'
+        })
+
+        foundUserAndUpdate.user_cv = {
+            public_id: media.public_id,
+            url: media.secure_url
+        }
+        await foundUserAndUpdate.save()
+
+
+        return res.status(200).json({
+            message: "Cập nhật người dùng thành công",
+            metadata: foundUserAndUpdate
+        })
+    } catch (error) {
+        return res.status(500).json({
+            message: "Lỗi hệ thống",
+            meatadata: error.message
+        })
+    }
+}
+
+const updateUserAvatar = async (req, res) => {
+    const userId = req.user.userId
+    const file = req.file
+    try {
+        const foundUser = await userModel.findById(userId)
+        if (!foundUser) throw res.status(401).json({ message: "Không tìm thấy người dùng" })
+
+        if (foundUser.user_avatar.public_id) {
+            cloudinary.uploader.destroy(foundUser.user_avatar.public_id)
+                .then(result => console.log("Delete image on cloud", result))
+                .catch(error => console.log("Delete Image Error", error))
+        }
+
+        const newAvatar = await cloudinary.uploader.upload(file.path, {
+            folder: 'SocialMedia'
+        })
+
+        foundUser.user_avatar = {
+            public_id: newAvatar.public_id,
+            url: newAvatar.secure_url,
+        }
+        await foundUser.save()
+        return res.status(200).json({
+            message: "Cập nhật Avatar thành công",
+            meatadata: foundUser
+        })
+
+    } catch (error) {
+        return res.status(500).json({
+            message: "Lỗi hệ thống",
+            meatadata: error.message
+        })
+    }
+
+}
+
+const updateUserCoverImage = async (req, res) => {
+    const userId = req.user.userId
+    const file = req.file
+
+    try {
+        const foundUser = await userModel.findById(userId)
+        if (!foundUser) throw res.status(401).json({ message: "Không tìm thấy người dùng" })
+
+        if (foundUser.user_avatar.public_id) {
+            cloudinary.uploader.destroy(foundUser.user_cover_image.public_id)
+                .then(result => console.log("Delete image on cloud", result))
+                .catch(error => console.log("Delete Image Error", error))
+        }
+
+        const newCoverImage = await cloudinary.uploader.upload(file.path, {
+            folder: 'SocialMedia'
+        })
+
+        foundUser.user_cover_image = {
+            public_id: newCoverImage.public_id,
+            url: newCoverImage.secure_url,
+        }
+        await foundUser.save()
+        return res.status(200).json({
+            message: "Cập nhật Cover image thành công",
+            meatadata: foundUser
+        })
+
+    } catch (error) {
+        return res.status(500).json({
+            message: "Lỗi hệ thống",
+            meatadata: error.message
+        })
+    }
+
+}
+
+const unFriend = async (req, res) => {
+    const userId = req.user.userId
+    const { unFriendUserId } = req.body
+    try {
+        await unfriendService(userId, unFriendUserId)
+        return res.status(200).json({
+            message: "Hủy kết bạn thành công",
+        })
+    } catch (error) {
+        return res.status(500).json({
+            message: "Lỗi hệ thống",
+            meatadata: error.message
+        })
+    }
+}
+
 module.exports = {
-    acceptFriendRequest, getFriendList, searchUser
+    acceptFriendRequest, getFriendList, searchUser,
+    getUserInfo, updateUserInfo, updateUserAvatar,
+    updateUserCoverImage, rejectFriendRequest, unFriend
 }

@@ -1,4 +1,5 @@
 const { default: mongoose } = require("mongoose");
+const cloudinary = require("../utils/cloudinary")
 
 const createVerifyCode = () => {
     // Tạo số ngẫu nhiên từ 0 đến 899999
@@ -21,4 +22,16 @@ const removeVietnameseTones = (str) => {
         .replace(/đ/g, 'd').replace(/Đ/g, 'D');
 }
 
-module.exports = { createVerifyCode, convertToObjectId, removeVietnameseTones }
+
+const uploadFile = async (files) => {
+    return await Promise.all(
+        files.map(async (file) => {
+            const { public_id, secure_url, resource_type } = await cloudinary.uploader.upload(file.path, {
+                resource_type: 'auto', folder: 'SocialMedia'
+            });
+            return { public_id, secure_url, resource_type }
+        })
+    );
+}
+
+module.exports = { createVerifyCode, convertToObjectId, removeVietnameseTones, uploadFile }

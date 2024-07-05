@@ -25,11 +25,22 @@ var userSchema = new mongoose.Schema({
     user_avatar: {
         public_id: {
             type: String,
-            default: null
+            default: ''
         },
         url: {
             type: String,
-            default: null
+            default: "https://res.cloudinary.com/dpczfcxl8/image/upload/v1714629955/SocialMedia/fdcmy8wzovpuzyrvacae.png"
+        }
+    },
+
+    user_cover_image: {
+        public_id: {
+            type: String,
+            default: ''
+        },
+        url: {
+            type: String,
+            default: "https://res.cloudinary.com/dpczfcxl8/image/upload/v1719477061/Coding_Social_cv37a9.png"
         }
     },
     user_email: {
@@ -44,28 +55,23 @@ var userSchema = new mongoose.Schema({
     },
     user_bio: {
         type: String,
-        default: null
+        default: undefined
     },
     user_cv: {
-        public_id: { type: String, default: null },
-        url: { type: String, default: null }
+        public_id: { type: String, default: '' },
+        url: { type: String, default: '' }
     },
     user_birthday: {
         type: String,
-        default: null
+        default: undefined
     },
     user_country: {
         type: String,
-        required: false,
-        default: null
+        default: undefined
     },
     user_list_friend: {
         type: [{ type: mongoose.Types.ObjectId, ref: "User" }],
     },
-    // user_list_friend_request: {
-    //     type: Array,
-    //     ref: "friendRequest"
-    // },
     user_display_settings: {
         user_email: {
             type: Boolean,
