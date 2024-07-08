@@ -1,4 +1,5 @@
 const chatRoomModal = require("../model/chatRoom");
+const { convertToObjectId } = require("../utils/createVerifyCode");
 // createChatRoom
 // getAllChatRoomUser
 // findChat
@@ -6,7 +7,9 @@ const chatRoomModal = require("../model/chatRoom");
 const getAllChatRoomOfUser = async (req, res) => {
    const userId = req.user.userId;
    try {
-      const chatRooms = await chatRoomModal.find({ members: userId }).lean();
+      const chatRooms = await chatRoomModal.find({ members: convertToObjectId(userId) })
+         .populate('members', 'user_name user_avatar')
+         .lean();
       return res.status(200).json({
          message: "Lấy danh sách Chat Room thành công",
          metadata: chatRooms,

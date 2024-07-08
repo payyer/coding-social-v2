@@ -5,7 +5,7 @@ const DOCUMENT_NAME = "ChatRoom";
 const COLLECTION_NAME = "ChatRooms";
 
 var chatSchema = new mongoose.Schema({
-    members: Array
+    members: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }]
 }, {
     timestamps: true,
     collection: COLLECTION_NAME
