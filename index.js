@@ -26,12 +26,27 @@ const io = new Server(server, {
         methods: ['GET', 'POST'],
     },
 });
-let onlineUsers = []
+// let onlineUsers = []
 io.on('connection', (socket) => {
     console.log(`User connected ${socket.id}`);
-    socket.on('addNewUser', (userId) => {
-        !onlineUsers.some((user) => user.userId === userId) &&
-            onlineUsers.push({ userId, socket: socket.id })
+    // socket.on('addNewUser', (userId) => {
+    //     !onlineUsers.some((user) => user.userId === userId) &&
+    //         onlineUsers.push({ userId, socket: socket.id })
+    // });
+
+    socket.on('joinRoom', ({ userId, chatRoomId }) => {
+        socket.join(chatRoomId);
+        console.log(`User ${userId} joined room ${chatRoomId}`);
+    });
+
+    socket.on('sendMessage', ({ userId, chatRoomId, text }) => {
+        console.log({ userId, chatRoomId, text })
+        io.to(chatRoomId).emit('receiveMessage', { _id: 1, senderId: userId, chatRoomId, text });
+    });
+
+    socket.on("leaveRoom", ({ userId, chatRoomId }) => {
+        socket.leave(chatRoomId);
+        console.log(`User ${userId} left room ${chatRoomId}`);
     });
 });
 
