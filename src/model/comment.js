@@ -9,7 +9,7 @@ var commentSchema = new mongoose.Schema({
     user_id_create: { type: mongoose.Types.ObjectId, ref: "User", required: true },
     post_id: { type: mongoose.Types.ObjectId, ref: "Post", required: true },
     parent_id: { type: mongoose.Types.ObjectId, ref: "Comment", default: null },
-    children: { type: [{ type: mongoose.Types.ObjectId }] }
+    children: { type: [{ type: mongoose.Types.ObjectId }], ref: "Comment", }
 }, {
     timestamps: true,
     collection: COLLECTION_NAME

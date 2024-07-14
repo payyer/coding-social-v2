@@ -4,7 +4,19 @@ const { convertToObjectId } = require("../utils/createVerifyCode");
 const getAllCommnet = async (req, res) => {
     const { post_id } = req.params
     try {
-        const foundComments = await commentModel.find({ post_id: post_id }).lean()
+        const foundComments = await commentModel.find({ post_id: post_id })
+            .populate({
+                path: 'user_id_create',
+                select: 'user_name user_avatar'
+            })
+            .populate({
+                path: 'children',
+                populate: {
+                    path: 'user_id_create',
+                    select: 'user_name user_avatar'
+                }
+            })
+            .lean()
 
         return res.status(200).json({
             message: "Get all commnet successfully!",
@@ -49,6 +61,7 @@ const deleteComment = async (req, res) => {
     const { commentId } = req.body
     try {
         const foundComments = await commentModel.findByIdAndDelete(convertToObjectId(commentId));
+        console.log({ foundComments })
         if (foundComments.children) {
             for (let i = 0; i < foundComments.children.length; i++) {
                 await commentModel.findByIdAndDelete(foundComments.children[i]);

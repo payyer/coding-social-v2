@@ -120,7 +120,7 @@ const login = async (req, res) => {
             await tokenModel.findByIdAndUpdate(foundTokenStore._id, { refresh_token: tokenPair.refreshToken, $push: { refresh_token_list: foundTokenStore.refresh_token } })
         }
 
-        res.cookie('accessToken', tokenPair.accessToken, { maxAge: 15 * 60 * 1000 })
+        res.cookie('accessToken', tokenPair.accessToken, { maxAge: 30 * 24 * 60 * 60 * 1000 })
         res.cookie('refreshToken', tokenPair.refreshToken, { httpOnly: true, maxAge: 30 * 24 * 60 * 60 * 1000 })
 
         return res.json({
