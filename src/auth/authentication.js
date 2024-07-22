@@ -23,7 +23,7 @@ const checkAuth = async (req, res, next) => {
             })
         }
         if (error) {
-            return res.status(401).json({
+            return res.status(403).json({
                 message: "Mã token không hợp lệ",
                 code: 403
             })

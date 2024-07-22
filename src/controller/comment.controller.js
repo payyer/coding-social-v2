@@ -1,4 +1,5 @@
 const commentModel = require("../model/comment");
+const postModel = require("../model/post.model");
 const { convertToObjectId } = require("../utils/createVerifyCode");
 
 const getAllCommnet = async (req, res) => {
@@ -45,6 +46,7 @@ const createComment = async (req, res) => {
                 $push: { children: newComment._id }
             });
         }
+        await postModel.findOneAndUpdate(convertToObjectId(post_id), { $inc: { post_comment: 1 } }).lean()
 
         return res.status(200).json({
             message: "Create new commnet successfully!",
@@ -67,6 +69,7 @@ const deleteComment = async (req, res) => {
                 await commentModel.findByIdAndDelete(foundComments.children[i]);
             }
         }
+        await postModel.findOneAndUpdate(convertToObjectId(post_id), { $inc: { post_comment: -1 } }).lean()
         return res.status(200).json({
             message: "Delete comment successfully!",
             metadata: foundComments,

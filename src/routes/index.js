@@ -7,5 +7,6 @@ router.use("/message", require("./message"));
 router.use("/friendRequest", require("./friendRequest"));
 router.use("/post", require("./post"));
 router.use("/comment", require("./comment"));
+router.use("/job", require("./job"));
 
 module.exports = router;

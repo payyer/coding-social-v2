@@ -1,4 +1,5 @@
 const userModel = require("../model/user.model")
+const postModel = require("../model/post.model")
 const friendRequestModel = require('../model/friendRequest')
 const { addFriendService, unfriendService } = require("../service/user.service")
 const { removeVietnameseTones } = require("../utils/createVerifyCode")
@@ -274,8 +275,61 @@ const unFriend = async (req, res) => {
     }
 }
 
+const getImage = async (req, res) => {
+    const userId = req.user.userId;
+    try {
+        const foundPosts = await postModel.find({ user_id: userId }).lean();
+
+        // Lọc các post media có resource_type là image
+        const imagePosts = foundPosts.map(post => ({
+            ...post,
+            post_media: post.post_media.filter(media => media.resource_type === 'image')
+        }));
+
+        // Tạo danh sách các post_media từ các post
+        const imageMedia = imagePosts.flatMap(post => post.post_media);
+
+        return res.status(200).json({
+            message: "Lay hinh anh cua nguoi dung thanh cong",
+            metadata: imageMedia
+        });
+    } catch (error) {
+        return res.status(500).json({
+            message: "Lỗi hệ thống",
+            metadata: error.message
+        });
+    }
+}
+
+const getVideo = async (req, res) => {
+    const userId = req.user.userId;
+    try {
+        const foundPosts = await postModel.find({ user_id: userId }).lean();
+
+        // Lọc các post media có resource_type là image
+        const imagePosts = foundPosts.map(post => ({
+            ...post,
+            post_media: post.post_media.filter(media => media.resource_type === 'video')
+        }));
+
+        // Tạo danh sách các post_media từ các post
+        const imageMedia = imagePosts.flatMap(post => post.post_media);
+
+        return res.status(200).json({
+            message: "Lay video cua nguoi dung thanh cong",
+            metadata: imageMedia
+        });
+    } catch (error) {
+        return res.status(500).json({
+            message: "Lỗi hệ thống",
+            metadata: error.message
+        });
+    }
+}
+
 module.exports = {
     acceptFriendRequest, getFriendList, searchUser,
     getUserInfo, updateUserInfo, updateUserAvatar,
-    updateUserCoverImage, rejectFriendRequest, unFriend
+    updateUserCoverImage, rejectFriendRequest, unFriend,
+    getImage, getVideo
 }
