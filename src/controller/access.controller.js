@@ -148,6 +148,7 @@ const getNewAccessToken = async (req, res) => {
         if (!foundTokenSotre) return res.status(404).json({ message: "Không tìm thấy token store" })
 
         const checkRefreshTokenIsExits = foundTokenSotre.refresh_token_list.includes(refreshToken)
+        console.log({ checkRefreshTokenIsExits })
         if (checkRefreshTokenIsExits) {
             await tokenModel.deleteOne({ user_id: user.userId })
             return res.status(400).json({ message: "Khi vấn bảo mật, mời đăng nhập lại" })

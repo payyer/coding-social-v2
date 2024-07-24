@@ -2,7 +2,7 @@ var jwt = require('jsonwebtoken');
 const tokenModel = require('../model/token.model');
 
 const createToken = async (payload) => {
-    const accessToken = await jwt.sign(payload, "PublicKey", { expiresIn: "15m" })
+    const accessToken = await jwt.sign(payload, "PublicKey", { expiresIn: "10s" })
     const refreshToken = await jwt.sign(payload, "PrivateKey", { expiresIn: "2days" })
     return { accessToken, refreshToken }
 }
@@ -23,7 +23,7 @@ const checkAuth = async (req, res, next) => {
             })
         }
         if (error) {
-            return res.status(403).json({
+            return res.status(401).json({
                 message: "Mã token không hợp lệ",
                 code: 403
             })

@@ -32,6 +32,16 @@ var userSchema = new mongoose.Schema({
             default: "https://res.cloudinary.com/dpczfcxl8/image/upload/v1714629955/SocialMedia/fdcmy8wzovpuzyrvacae.png"
         }
     },
+    user_background: {
+        public_id: {
+            type: String,
+            default: ''
+        },
+        url: {
+            type: String,
+            default: "https://res.cloudinary.com/dpczfcxl8/image/upload/v1714629955/SocialMedia/fdcmy8wzovpuzyrvacae.png"
+        }
+    },
 
     user_cover_image: {
         public_id: {
